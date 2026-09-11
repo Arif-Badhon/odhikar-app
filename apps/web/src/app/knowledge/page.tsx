@@ -95,8 +95,7 @@ export default function KnowledgeIndex() {
               return (
                 <Link
                   key={a.id}
-                  to="/knowledge/$slug"
-                  params={{ slug: a.slug }}
+                  href={`/knowledge/${a.slug}`}
                   className="surface-panel flex flex-col p-5 transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <span className="bn w-fit rounded-full bg-accent px-2.5 py-1 text-[11px] font-medium text-primary">

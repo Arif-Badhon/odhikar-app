@@ -8,8 +8,10 @@ import { useCaseStore } from "@/lib/odhikar/store";
 import { useEffect } from "react";
 
 
-export default function ParalegalLayout() {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+import { usePathname, redirect } from "next/navigation";
+
+export default function ParalegalLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const { user, ready, signOut } = useParalegalSession();
   const { refresh } = useCaseStore();
   useEffect(() => { if (user) void refresh(); }, [user, refresh]);
@@ -21,7 +23,9 @@ export default function ParalegalLayout() {
       </div>
     );
 
-  if (!user) return <Navigate to="/paralegal/login" />;
+  if (!user) {
+    redirect("/staff/login");
+  }
 
   return (
     <div className="min-h-screen bg-secondary/30">
@@ -35,13 +39,13 @@ export default function ParalegalLayout() {
             </span>
           </span>
           <nav className="flex items-center gap-4 text-sm">
-            <Link href="/paralegal" className="flex items-center gap-1.5 opacity-80 hover:opacity-100">
+            <Link href="/staff" className="flex items-center gap-1.5 opacity-80 hover:opacity-100">
               <BarChart3 className="size-3.5" /> Dashboard
             </Link>
-            <Link href="/paralegal/cases" className="flex items-center gap-1.5 opacity-80 hover:opacity-100">
+            <Link href="/staff/cases" className="flex items-center gap-1.5 opacity-80 hover:opacity-100">
               <BriefcaseBusiness className="size-3.5" /> Cases
             </Link>
-            <Link href="/paralegal/training" className="flex items-center gap-1.5 opacity-80 hover:opacity-100">
+            <Link href="/staff/training" className="flex items-center gap-1.5 opacity-80 hover:opacity-100">
               <GraduationCap className="size-3.5" /> Training
             </Link>
           </nav>
@@ -67,7 +71,7 @@ export default function ParalegalLayout() {
           </div>
         </div>
       </header>
-      <Outlet />
+      {children}
       <footer className="border-t border-border bg-card py-6">
         <p className="mx-auto max-w-7xl px-5 text-xs text-muted-foreground">
           Nothing in Odhikar is final until a paralegal reviews and approves it. Drafts are generated

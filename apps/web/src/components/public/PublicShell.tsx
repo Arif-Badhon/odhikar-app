@@ -78,7 +78,7 @@ export function PublicHeader() {
         <div className="ml-auto hidden items-center gap-2 md:flex">
           <LanguageToggle />
           <Link
-            href="/paralegal/login"
+            href="/staff/login"
             className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs text-muted-foreground transition-colors hover:text-foreground"
           >
             <Lock className="size-3.5" /> Staff login
@@ -123,7 +123,7 @@ export function PublicHeader() {
               );
             })}
             <Link
-              href="/paralegal/login"
+              href="/staff/login"
               onClick={() => setOpen(false)}
               className="mt-1 flex items-center gap-2 rounded-lg px-3 py-3 text-sm text-muted-foreground"
             >
@@ -193,7 +193,7 @@ export function PublicFooter() {
               </Link>
             </li>
             <li>
-              <Link href="/paralegal/login" className="hover:text-foreground">
+              <Link href="/staff/login" className="hover:text-foreground">
                 Staff / Paralegal login
               </Link>
             </li>

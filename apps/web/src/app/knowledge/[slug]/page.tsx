@@ -92,8 +92,7 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
               {related.map((r) => (
                 <Link
                   key={r.slug}
-                  to="/knowledge/$slug"
-                  params={{ slug: r.slug }}
+                  href={`/knowledge/${r.slug}`}
                   className="surface-panel p-4 transition-shadow hover:shadow-md"
                 >
                   <p className="bn font-medium leading-snug">{r.titleBn}</p>
