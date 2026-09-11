@@ -3,8 +3,6 @@ use serde::Deserialize;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use sqlx::Row;
 use std::env;
-use std::fs::File;
-use std::io::BufReader;
 use std::str::FromStr;
 use uuid::Uuid;
 
@@ -37,9 +35,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let database_url = env::var("DATABASE_URL")
         .expect("DATABASE_URL must be set in your .env file");
 
+    let api_url = env::var("KNOWLEDGE_API_URL")
+        .unwrap_or_else(|_| "https://project8.qubitsolutionlab.com/api/knowledge".to_string());
+
     println!(">>> Connecting to Supabase at runtime...");
     
-    // Disable prepared statement cache for compatibility with Supabase Pooler
     let connect_options = PgConnectOptions::from_str(&database_url)?
         .statement_cache_capacity(0);
 
@@ -48,15 +48,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .connect_with(connect_options)
         .await?;
 
-    println!(">>> Reading data/legal_statutes.json...");
-    let file = File::open("data/legal_statutes.json")?;
-    let reader = BufReader::new(file);
-    let entries: Vec<LegalEntry> = serde_json::from_reader(reader)?;
+    println!(">>> Fetching knowledge data from API: {}...", api_url);
+    
+    let client = reqwest::Client::new();
+    let response = client.get(&api_url).send().await?;
+    
+    if !response.status().is_success() {
+        return Err(format!("Failed to fetch API. Status: {}", response.status()).into());
+    }
+
+    let entries: Vec<LegalEntry> = response.json().await?;
 
     println!(">>> Ingesting {} verified entries into database...", entries.len());
 
     for entry in entries {
-        // 1. Insert knowledge source
         let source_row = sqlx::query(
             r#"
             INSERT INTO knowledge_sources (
@@ -79,7 +84,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let source_id: Uuid = source_row.get("id");
 
-        // 2. Insert knowledge article
         let article_row = sqlx::query(
             r#"
             INSERT INTO knowledge_articles (
@@ -110,7 +114,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let article_id: Uuid = article_row.get("id");
 
-        // 3. Link source to article
         sqlx::query(
             r#"
             INSERT INTO article_source_mappings (article_id, source_id, section_name)

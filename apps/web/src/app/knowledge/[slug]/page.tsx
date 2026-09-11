@@ -8,8 +8,11 @@ import { KNOWLEDGE_ARTICLES, getArticle, getCategory, getSourcesForArticle } fro
 
 import { notFound } from "next/navigation";
 
-export default function ArticlePage({ params }: { params: { slug: string } }) {
-  const article = KNOWLEDGE_ARTICLES.find((a) => a.slug === params.slug);
+import React from "react";
+
+export default function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = React.use(params);
+  const article = KNOWLEDGE_ARTICLES.find((a) => a.slug === slug);
   if (!article) return <ArticleNotFound />;
 
   const category = getCategory(article.categoryId);
