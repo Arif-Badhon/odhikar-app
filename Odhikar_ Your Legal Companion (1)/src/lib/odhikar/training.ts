@@ -1,0 +1,8 @@
+export interface TrainingScenario { id:string; titleBn:string; titleEn:string; persona:string; difficulty:"Beginner"|"Intermediate"|"Advanced"; category:string; brief:string; focus:string[]; }
+export const TRAINING_SCENARIOS: TrainingScenario[] = [
+  {id:"train-dower",titleBn:"দেনমোহর ও ভরণপোষণ",titleEn:"Dower and maintenance",persona:"শারমিন আক্তার",difficulty:"Beginner",category:"Dower & Maintenance",brief:"A separated client needs help organising a dower and maintenance intake.",focus:["Rapport","Chronology","Documents"]},
+  {id:"train-dowry",titleBn:"অসম্পূর্ণ প্রমাণসহ যৌতুকের চাপ",titleEn:"Dowry pressure",persona:"মৌসুমী রহমান",difficulty:"Intermediate",category:"Dowry",brief:"The client reports repeated demands but is unsure what evidence matters.",focus:["Evidence","Non-leading questions","Safety"]},
+  {id:"train-safety",titleBn:"নিরাপত্তা প্রকাশসহ পারিবারিক সহিংসতা",titleEn:"Safety disclosure",persona:"রুবিনা ইয়াসমিন",difficulty:"Advanced",category:"Family safety",brief:"A distressed client initially asks only about maintenance.",focus:["Safety","Escalation","Client-centred practice"]},
+  {id:"train-wages",titleBn:"বকেয়া মজুরি",titleEn:"Unpaid wages",persona:"মোঃ জসিম উদ্দিন",difficulty:"Beginner",category:"Unpaid Wages",brief:"A worker has not received the final part of his wages.",focus:["Amounts","Chronology","Evidence"]},
+  {id:"train-land",titleBn:"জমি ও উত্তরাধিকার বিরোধ",titleEn:"Land and inheritance",persona:"সালমা খাতুন",difficulty:"Intermediate",category:"Land Dispute",brief:"A client believes siblings may sell inherited land.",focus:["Documents","Parties","Urgency"]},
+];
