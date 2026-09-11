@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    restart: unless-stopped
+    depends_on:
+      - api
+
+  api:
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./services/api/.env
+    restart: unless-stopped
+
+  ingest:
+    build:
+      context: ./crates/ingest
+      dockerfile: Dockerfile
+    env_file:
+      - ./crates/ingest/.env
+    restart: unless-stopped
