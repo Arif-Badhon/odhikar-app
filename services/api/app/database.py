@@ -15,7 +15,9 @@ async def init_db():
         )
         print("Database connection pool created successfully.")
     except Exception as e:
-        print(f"Failed to create database connection pool: {e}")
+        import traceback
+        print("Failed to create database connection pool:")
+        traceback.print_exc()
         pool = None
 
 async def close_db():
