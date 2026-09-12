@@ -8,9 +8,6 @@ services:
     environment:
       - NEXT_PUBLIC_API_URL=http://146.190.105.57:8001
       - GEMINI_API_KEY=${GEMINI_API_KEY:-AQ.Ab8RN6Jeom4ecT_urT-bzQBmxbocgrVHKb3lI1Vl-zErj3ZdOw}
-    env_file:
-      - ./apps/web/.env.local
-      - ./apps/web/.env
     restart: unless-stopped
     depends_on:
       - api
