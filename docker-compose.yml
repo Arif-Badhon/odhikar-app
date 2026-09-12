@@ -35,3 +35,5 @@ services:
     env_file:
       - ./crates/ingest/.env
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
