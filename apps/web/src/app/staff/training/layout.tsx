@@ -4,4 +4,61 @@ import Link from "next/link";
 import { ArrowRight, GraduationCap } from "lucide-react";
 import { TRAINING_SCENARIOS } from "@/lib/odhikar/training";
 import { Badge } from "@/components/ui/badge";
-export default function Training(){return <main className="mx-auto max-w-7xl px-5 py-8"><div className="max-w-2xl"><span className="flex size-11 items-center justify-center rounded-xl bg-accent text-primary"><GraduationCap/></span><h1 className="mt-4 text-3xl font-semibold">Simulation Training</h1><p className="mt-2 text-sm text-muted-foreground">Practise client-centred interviews with synthetic personas. Hidden facts are revealed only through appropriate questions; attempts are scored and saved to your staff history.</p></div><div className="mt-7 grid gap-4 md:grid-cols-2 xl:grid-cols-3">{TRAINING_SCENARIOS.map(s=><Link key={s.id} href={`/staff/training/${s.id}`} className="surface-panel group p-5 transition hover:-translate-y-0.5 hover:shadow-md"><div className="flex justify-between"><Badge variant="secondary">{s.difficulty}</Badge><span className="text-xs text-muted-foreground">{s.category}</span></div><h2 className="bn mt-4 text-lg font-semibold">{s.titleBn}</h2><p className="text-sm text-muted-foreground">{s.titleEn}</p><p className="mt-3 text-sm leading-relaxed">{s.brief}</p><div className="mt-4 flex flex-wrap gap-1">{s.focus.map(f=><span key={f} className="rounded bg-secondary px-2 py-1 text-[11px]">{f}</span>)}</div><p className="mt-5 flex items-center gap-1 text-sm font-medium text-primary">Start simulation <ArrowRight className="size-4 transition group-hover:translate-x-1"/></p></Link>)}</div><Link href="/staff/training/history" className="mt-7 inline-flex text-sm font-medium text-primary">View attempt history →</Link></main>}
+export default function Training() {
+  return (
+    <main className="mx-auto max-w-7xl px-5 py-8">
+      <div className="max-w-2xl">
+        <span className="flex size-11 items-center justify-center rounded-xl bg-accent text-primary">
+          <GraduationCap />
+        </span>
+        <h1 className="mt-4 text-3xl font-semibold">Simulation Training</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Practise client-centred interviews with synthetic personas. Hidden facts are revealed only through appropriate questions; attempts are scored and saved to your staff history.
+        </p>
+        <div className="mt-4 flex gap-4">
+          <a
+            href="https://paralegal-ai-coach.lovable.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex text-sm font-medium text-primary hover:underline"
+          >
+            Access Paralegal AI Coach ↗
+          </a>
+        </div>
+      </div>
+      <div className="mt-7 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {TRAINING_SCENARIOS.map((s) => (
+          <Link
+            key={s.id}
+            href={`/staff/training/${s.id}`}
+            className="surface-panel group p-5 transition hover:-translate-y-0.5 hover:shadow-md"
+          >
+            <div className="flex justify-between">
+              <Badge variant="secondary">{s.difficulty}</Badge>
+              <span className="text-xs text-muted-foreground">{s.category}</span>
+            </div>
+            <h2 className="bn mt-4 text-lg font-semibold">{s.titleBn}</h2>
+            <p className="text-sm text-muted-foreground">{s.titleEn}</p>
+            <p className="mt-3 text-sm leading-relaxed">{s.brief}</p>
+            <div className="mt-4 flex flex-wrap gap-1">
+              {s.focus.map((f) => (
+                <span key={f} className="rounded bg-secondary px-2 py-1 text-[11px]">
+                  {f}
+                </span>
+              ))}
+            </div>
+            <p className="mt-5 flex items-center gap-1 text-sm font-medium text-primary">
+              Start simulation <ArrowRight className="size-4 transition group-hover:translate-x-1" />
+            </p>
+          </Link>
+        ))}
+      </div>
+      <Link
+        href="/staff/training/history"
+        className="mt-7 inline-flex text-sm font-medium text-primary hover:underline"
+      >
+        View attempt history →
+      </Link>
+    </main>
+  );
+}
