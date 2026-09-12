@@ -1,9 +1,7 @@
 // Persistence boundary. Today: browser storage seeded with demo cases.
 // Swapping in a database means implementing CaseRepository once.
-import { supabase } from "@/integrations/supabase/client";
 import { submitVictimCase } from "./case.functions";
 import { seedQueue } from "./fixtures";
-import type { Json } from "@/integrations/supabase/types";
 import type { CaseRecord } from "./types";
 import type { CaseRepository } from "./services/types";
 
@@ -64,43 +62,54 @@ export class LocalCaseRepository implements CaseRepository {
 
 class CloudCaseRepository implements CaseRepository {
   private fallback = new LocalCaseRepository();
-
-  async list(): Promise<CaseRecord[]> {
-    const { data: auth } = await supabase.auth.getSession();
-    if (!auth.session) return [];
-    const { data, error } = await supabase.from("cases").select("structured_record,audio_path").eq("case_kind", "victim");
-    if (error) throw error;
-    return Promise.all((data ?? []).map(async (row) => {
-      const record = row.structured_record as unknown as CaseRecord;
-      if (!row.audio_path) return record;
-      const signed = await supabase.storage.from("case-audio").createSignedUrl(row.audio_path, 900);
-      return { ...record, audioDataUrl: signed.data?.signedUrl };
-    }));
+  
+  private get url() {
+    return process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   }
 
-  async get(id: string) { return (await this.list()).find((record) => record.id === id); }
+  async list(): Promise<CaseRecord[]> {
+    try {
+      const token = localStorage.getItem("odhikar_access_token");
+      const res = await fetch(`${this.url}/cases/queue`, {
+        headers: token ? { "Authorization": `Bearer ${token}` } : {}
+      });
+      if (!res.ok) return [];
+      const data = await res.json();
+      return data.map((row: any) => {
+        let record = row.structured_record;
+        if (typeof record === "string") {
+            try { record = JSON.parse(record); } catch(e) {}
+        }
+        if (row.audio_path) {
+            record.audioDataUrl = `${this.url}/${row.audio_path}`;
+        }
+        return record;
+      });
+    } catch {
+      return [];
+    }
+  }
+
+  async get(id: string) {
+    try {
+      const res = await fetch(`${this.url}/cases/${id}`);
+      if (!res.ok) return undefined;
+      const data = await res.json();
+      const record = typeof data.structured_record === "string" ? JSON.parse(data.structured_record) : data.structured_record;
+      if (data.audio_path) {
+        record.audioDataUrl = `${this.url}/${data.audio_path}`;
+      }
+      return record;
+    } catch {
+      return undefined;
+    }
+  }
 
   async save(record: CaseRecord): Promise<CaseRecord> {
     try {
-      const { data: auth } = await supabase.auth.getSession();
-      if (auth.session) {
-        const safe = { ...record };
-        delete safe.audioDataUrl;
-        const { error } = await supabase.from("cases").update({
-          status: record.status,
-          urgency: record.urgency,
-          safety_flag: record.safetyFlag,
-          safety_note: record.safetyNote ?? null,
-          structured_record: safe as unknown as Json,
-          missing_fields: record.missing as Json,
-        }).eq("case_number", record.id).eq("case_kind", "victim");
-        if (error) throw error;
-      } else {
-        await submitVictimCase({ data: { record } });
-      }
+      await submitVictimCase({ data: { record } });
       return record;
     } catch (error) {
-      // A failed public submission remains recoverable on this device and is never presented as synced.
       await this.fallback.save(record);
       throw error;
     }
