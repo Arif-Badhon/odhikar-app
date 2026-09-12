@@ -18,7 +18,9 @@ export const submitVictimCase = async ({ data: input }: { data: { record: CaseRe
     if (!isVictimRecord(input?.record)) throw new Error("Invalid victim case submission");
     const record = input.record;
 
-    const url = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    // Server actions run in the Node.js context, so they must use absolute URLs.
+    // We can talk directly to the FastAPI container using Docker's internal networking.
+    const url = process.env.INTERNAL_API_URL || "http://api:8000";
     const res = await fetch(`${url}/cases/submit`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
