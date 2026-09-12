@@ -69,7 +69,7 @@ function HomeContent() {
         <div className="flex items-center gap-2">
           <LanguageToggle className="border-primary-foreground/25 bg-primary/35 text-primary-foreground backdrop-blur-sm [&_svg]:text-primary-foreground/70 [&_button:not([aria-pressed=true])]:text-primary-foreground/70" />
           <Link
-            href="/paralegal/login"
+            href="/staff/login"
             className="hidden size-10 items-center justify-center rounded-lg border border-primary-foreground/20 text-primary-foreground/70 transition-colors hover:bg-primary-foreground/10 hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground sm:flex"
             aria-label={t("কর্মী প্রবেশ", "Staff sign in")}
             title={t("কর্মী প্রবেশ", "Staff sign in")}
@@ -121,7 +121,7 @@ function HomeContent() {
           <a href="tel:16430" className="font-medium text-primary-foreground hover:underline">
             {t("আইন সহায়তা ১৬৪৩০", "Legal aid 16430")}
           </a>
-          <Link href="/paralegal/login" className="sm:hidden">
+          <Link href="/staff/login" className="sm:hidden">
             {t("কর্মী প্রবেশ", "Staff")}
           </Link>
         </div>
