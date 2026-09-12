@@ -24,8 +24,13 @@ export default function ParalegalLayout({ children }: { children: React.ReactNod
     );
 
   if (!user) {
+    if (pathname === "/staff/login") return <>{children}</>;
     redirect("/staff/login");
   }
+
+  // If user is authenticated but on the login page, the login page's useEffect will redirect them.
+  // We can just render the children (the login page) without the header to avoid UI flicker.
+  if (pathname === "/staff/login") return <>{children}</>;
 
   return (
     <div className="min-h-screen bg-secondary/30">
