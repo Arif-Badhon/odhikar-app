@@ -37,7 +37,7 @@ export const transcribeAudio = async ({ data: input }: { data: { base64: string;
   };
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${key}`;
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
