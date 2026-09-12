@@ -73,9 +73,9 @@ class CloudCaseRepository implements CaseRepository {
       const res = await fetch(`${this.url}/cases/queue`, {
         headers: token ? { "Authorization": `Bearer ${token}` } : {}
       });
-      if (!res.ok) return [];
+      if (!res.ok) throw new Error("API request failed");
       const data = await res.json();
-      return data.map((row: any) => {
+      const onlineCases = data.map((row: any) => {
         let record = row.structured_record;
         if (typeof record === "string") {
             try { record = JSON.parse(record); } catch(e) {}
@@ -85,15 +85,21 @@ class CloudCaseRepository implements CaseRepository {
         }
         return record;
       });
+      
+      const localCases = await this.fallback.list();
+      const onlineIds = new Set(onlineCases.map((c: any) => c.id));
+      const offlineCases = localCases.filter(c => !onlineIds.has(c.id));
+      
+      return [...onlineCases, ...offlineCases];
     } catch {
-      return [];
+      return this.fallback.list();
     }
   }
 
   async get(id: string) {
     try {
       const res = await fetch(`${this.url}/cases/${id}`);
-      if (!res.ok) return undefined;
+      if (!res.ok) throw new Error("API failed");
       const data = await res.json();
       const record = typeof data.structured_record === "string" ? JSON.parse(data.structured_record) : data.structured_record;
       if (data.audio_path) {
@@ -101,7 +107,7 @@ class CloudCaseRepository implements CaseRepository {
       }
       return record;
     } catch {
-      return undefined;
+      return this.fallback.get(id);
     }
   }
 
