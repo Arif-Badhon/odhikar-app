@@ -1,7 +1,7 @@
 "use server";
 
 const DEMO = {
-  nasrin: { email: "nasrin@odhikar.demo", password: "odhikar2026", name: "Nasrin Akter", role: "paralegal" },
+  arif: { email: "arif@odhikar.demo", password: "odhikar2026", name: "Arif", role: "paralegal" },
   coordinator: { email: "coordinator@odhikar.demo", password: "odhikar2026", name: "Shahin Rahman", role: "coordinator" },
 } as const;
 

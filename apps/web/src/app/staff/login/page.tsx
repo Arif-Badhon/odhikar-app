@@ -102,7 +102,7 @@ export default function StaffLogin() {
             </form>
 
             <p className="mt-5 rounded-lg bg-secondary/70 p-3 text-xs text-muted-foreground">
-              Supabase Auth demo credentials — <strong>nasrin</strong> / <strong>odhikar2026</strong> (paralegal) or{" "}
+              Supabase Auth demo credentials — <strong>arif</strong> / <strong>odhikar2026</strong> (paralegal) or{" "}
               <strong>coordinator</strong> / <strong>odhikar2026</strong>.
             </p>
           </div>

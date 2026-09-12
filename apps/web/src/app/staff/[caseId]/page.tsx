@@ -125,7 +125,7 @@ export default function CaseDetail({ params }: { params: { caseId: string } }) {
                 size="sm"
                 onClick={() => {
                   save({ ...record, status: "Assigned" });
-                  toast.success("Reassigned to Nasrin A. (demo)");
+                  toast.success("Reassigned to Arif (demo)");
                 }}
               >
                 <UserCog className="size-4" /> Reassign
