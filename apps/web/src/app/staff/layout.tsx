@@ -50,9 +50,9 @@ export default function ParalegalLayout({ children }: { children: React.ReactNod
             <Link href="/staff/cases" className="flex items-center gap-1.5 opacity-80 hover:opacity-100">
               <BriefcaseBusiness className="size-3.5" /> Cases
             </Link>
-            <Link href="/staff/training" className="flex items-center gap-1.5 opacity-80 hover:opacity-100">
+            <a href="https://paralegal-ai-coach.lovable.app/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 opacity-80 hover:opacity-100">
               <GraduationCap className="size-3.5" /> Training
-            </Link>
+            </a>
           </nav>
           <div className="ml-auto flex items-center gap-3 text-xs">
             <span className="hidden opacity-60 lg:inline">{pathname}</span>
