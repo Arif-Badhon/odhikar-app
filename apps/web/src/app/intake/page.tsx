@@ -28,6 +28,7 @@ import { analysisService, transcriptionService } from "@/lib/odhikar/services/an
 import { buildCaseRecord } from "@/lib/odhikar/services/caseBuilder";
 import { MAX_FOLLOW_UPS, nextQuestion } from "@/lib/odhikar/services/questions";
 import { generateCaseId } from "@/lib/odhikar/repository";
+import { generateCaseReport } from "@/lib/odhikar/ai.functions";
 import { useCaseStore } from "@/lib/odhikar/store";
 import { CATEGORY_BN, type CaseRecord, type LegalCategory } from "@/lib/odhikar/types";
 import type { AnalysisResult, FollowUpQuestion } from "@/lib/odhikar/services/types";
@@ -42,6 +43,7 @@ type Step =
   | "transcript"
   | "analysing"
   | "followup"
+  | "generating-report"
   | "rights"
   | "summary"
   | "referral"
@@ -245,8 +247,17 @@ export default function ClientIntake() {
       setStep("followup");
     } else {
       setQuestion(null);
-      setStep("rights");
+      await runReportGeneration(text, ans, a);
     }
+  };
+
+  const runReportGeneration = async (text: string, ans: Record<string, string>, a: AnalysisResult) => {
+    setStep("generating-report");
+    const res = await generateCaseReport({ data: { transcript: text, answers: ans, classification: a.classification.primary } });
+    if (res.ok) {
+      persist(a, ans, { generatedReport: res.report });
+    }
+    setStep("rights");
   };
 
   const submitAnswer = async (value: string) => {
@@ -445,19 +456,23 @@ export default function ClientIntake() {
     );
 
   /* ------------------------------- loaders --------------------------------- */
-  if (step === "transcribing" || step === "analysing")
+  if (step === "transcribing" || step === "analysing" || step === "generating-report")
     return (
-      <Shell step={step === "transcribing" ? "record" : "followup"}>
+      <Shell step={step === "transcribing" ? "record" : step === "generating-report" ? "summary" : "followup"}>
         <div className="surface-panel flex flex-col items-center p-10 text-center shadow-sm">
           <Loader2 className="size-10 animate-spin text-primary" />
           <p className="bn mt-5 text-lg font-medium">
             {step === "transcribing"
               ? "আপনার কথা লেখায় রূপান্তর করা হচ্ছে…"
+              : step === "generating-report"
+              ? "প্যারালিগ্যাল এর জন্য রিপোর্ট তৈরি করা হচ্ছে…"
               : "আপনার কথাগুলো গুছিয়ে নেওয়া হচ্ছে…"}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
             {step === "transcribing"
               ? "Bangla speech-to-text on your actual recording"
+              : step === "generating-report"
+              ? "Generating a comprehensive case report based on BD laws"
               : "Safety check, fact extraction and category analysis"}
           </p>
         </div>
@@ -652,6 +667,14 @@ export default function ClientIntake() {
                   <li key={m}>• {m}</li>
                 ))}
               </ul>
+            </div>
+          ) : null}
+          {record.generatedReport ? (
+            <div className="mt-6 rounded-xl bg-muted/30 p-4 border border-border/50">
+              <h3 className="bn text-sm font-semibold text-primary mb-3">প্যারালিগ্যাল রিপোর্ট</h3>
+              <div className="bn text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                {record.generatedReport}
+              </div>
             </div>
           ) : null}
           <Button className="mt-6 h-14 w-full text-base" onClick={() => setStep("referral")}>

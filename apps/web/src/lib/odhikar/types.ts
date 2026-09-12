@@ -144,6 +144,7 @@ export interface CaseRecord {
   transcriptSource?: "speech-to-text" | "typed" | "fixture" | undefined;
   draftApproved?: boolean;
   draftEdited?: string;
+  generatedReport?: string;
   appointment?: { clinicId: string; slotId: string; label: string };
   scenarioId?: string;
   answers?: Record<string, string>;

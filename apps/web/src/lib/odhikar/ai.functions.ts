@@ -3,6 +3,7 @@
 "use server";
 
 import type { ClassificationResult, ExtractionResult, SafetyResult } from "./services/types";
+import { KNOWLEDGE_ARTICLES, KNOWLEDGE_CATEGORIES } from "./knowledge";
 
 export type TranscribeResponse =
   | { ok: true; text: string; provider: string }
@@ -68,18 +69,26 @@ export type AnalyseResponse =
   }
   | { ok: false; reason: string };
 
-const SYSTEM = `You are the intake analyst of Odhikar, a Bangladeshi legal-aid paralegal assistant.
+const getSystemPrompt = () => {
+  const laws = KNOWLEDGE_ARTICLES.map(a => `${a.titleEn}: ${a.summaryBn}`).join("\n");
+  const cats = KNOWLEDGE_CATEGORIES.map(c => `"${c.nameEn}"`).join(", ");
+
+  return `You are the intake analyst of Odhikar, a Bangladeshi legal-aid paralegal assistant.
 You NEVER give legal advice and NEVER invent facts. Work only from the client's own words.
 Supported categories: "Dower & Maintenance", "Dowry", "Land Dispute", "Unpaid Wages".
 If the narrative matches none of them use "Out of scope" with outOfScope=true.
+Apply these Bangladesh laws for context:
+${laws}
+
 Leave any value you cannot ground in the text out of the JSON entirely (do not guess).
 For unpaid wages, if daysWorked and dailyRate are stated, compute wagesTotal and outstanding.
 Detect safety indicators (physical violence, injury, denial of medical care, confinement,
 threat to life). severity "immediate" means the automated flow must stop.
-Return the missing information a paralegal would still need, as machine keys from this set:
+Based on the provided narrative and legal context, you MUST return exactly 4 or 5 missing pieces of information a paralegal would still need to build a complete case, as machine keys from this set:
 respondent, marriageDate, dower, dowryPaid, dependants, daysWorked, dailyRate, wagesPaid,
 evidence, evidenceLocation, landArea, saleRisk, who, what, howLong.
 Reply with JSON only.`;
+};
 
 const SCHEMA = `{
  "safety": {"triggered": bool, "severity": "none"|"elevated"|"immediate", "reasons": [string]},
@@ -114,7 +123,7 @@ export const analyseNarrative = async ({ data: input }: { data: { transcript: st
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${key}`;
     const payload = {
       systemInstruction: {
-        parts: [{ text: `${SYSTEM}\nJSON shape:\n${SCHEMA}` }]
+        parts: [{ text: `${getSystemPrompt()}\nJSON shape:\n${SCHEMA}` }]
       },
       generationConfig: {
         responseMimeType: "application/json"
@@ -154,3 +163,72 @@ export const analyseNarrative = async ({ data: input }: { data: { transcript: st
     return { ok: false, reason: `AI analysis unreachable: ${String(e)}` };
   }
 };
+
+export type GenerateReportResponse = 
+  | { ok: true; report: string }
+  | { ok: false; reason: string };
+
+export const generateCaseReport = async ({
+  data: input
+}: {
+  data: { transcript: string; answers?: Record<string, string>; classification: string }
+}): Promise<GenerateReportResponse> => {
+  const key = process.env["GEMINI_API_KEY"];
+  if (!key) return { ok: false, reason: "AI generation is not configured. Missing GEMINI_API_KEY." };
+
+  const transcript = String(input?.transcript ?? "").slice(0, 8000);
+  const answers = Object.entries(input?.answers ?? {})
+    .map(([k, v]) => `- ${k}: ${v}`)
+    .join("\n");
+  const classification = input?.classification ?? "Unknown";
+
+  const lawsContext = KNOWLEDGE_ARTICLES
+    .filter(a => a.categoryId === classification.toLowerCase() || classification.includes(a.categoryId))
+    .map(a => `${a.titleBn} (${a.titleEn}): ${a.summaryBn}`)
+    .join("\n");
+
+  const prompt = `You are a legal-aid paralegal assistant in Bangladesh.
+Write a comprehensive, professional case report for the admin paralegal based on the following client narrative and their answers to follow-up questions.
+The case has been classified as: ${classification}.
+Relevant BD laws context:
+${lawsContext}
+
+Client Narrative:
+"""
+${transcript}
+"""
+
+Follow-up Answers:
+${answers || "(None provided)"}
+
+Your report must:
+1. Provide a clear summary of the incident.
+2. Outline the legal rights and potential paths of action for the client based on BD laws.
+3. Highlight any immediate safety concerns or critical missing information.
+4. Be structured with clear headings.
+5. Be written in formal Bengali (Bangla).
+
+Do not include JSON, just return the markdown report text.`;
+
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${key}`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ role: "user", parts: [{ text: prompt }] }]
+      }),
+    });
+
+    if (!res.ok) {
+      return { ok: false, reason: `Report generation failed (${res.status})` };
+    }
+
+    const json = await res.json();
+    const text = json.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? "";
+    return { ok: true, report: text };
+  } catch (e) {
+    return { ok: false, reason: `Report generation unreachable: ${String(e)}` };
+  }
+};
+
