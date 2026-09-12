@@ -25,6 +25,8 @@ services:
     volumes:
       - ./uploads:/app/uploads
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   ingest:
     build:
