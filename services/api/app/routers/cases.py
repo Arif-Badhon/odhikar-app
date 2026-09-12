@@ -25,7 +25,7 @@ async def get_case_queue(status: Optional[str] = None, conn = Depends(get_db_con
 
 @router.get("/{case_id}")
 async def get_case_detail(case_id: str, conn = Depends(get_db_connection)):
-    row = await conn.fetchrow("SELECT * FROM cases WHERE id = $1", case_id)
+    row = await conn.fetchrow("SELECT * FROM cases WHERE case_number = $1", case_id)
     if not row:
         raise HTTPException(status_code=404, detail="Case not found")
     return dict(row)
@@ -35,7 +35,7 @@ class UpdateStatusRequest(BaseModel):
 
 @router.patch("/{case_id}/status")
 async def update_case_status(case_id: str, req: UpdateStatusRequest, conn = Depends(get_db_connection)):
-    await conn.execute("UPDATE cases SET status = $1, updated_at = NOW() WHERE id = $2", req.status, case_id)
+    await conn.execute("UPDATE cases SET status = $1, updated_at = NOW() WHERE case_number = $2", req.status, case_id)
     return {"status": "SUCCESS"}
 
 @router.post("/submit")
