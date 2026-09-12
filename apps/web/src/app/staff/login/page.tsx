@@ -6,11 +6,11 @@ import { ArrowLeft, Loader2, Lock, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
 import { useParalegalSession } from "@/lib/odhikar/auth";
 
-
 export default function StaffLogin() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { user, ready, signIn } = useParalegalSession();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -18,8 +18,8 @@ export default function StaffLogin() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (ready && user) void navigate({ to: "/paralegal" });
-  }, [ready, user, navigate]);
+    if (ready && user) router.push("/staff/cases");
+  }, [ready, user, router]);
 
   return (
     <main className="grid min-h-screen lg:grid-cols-2">
@@ -70,7 +70,7 @@ export default function StaffLogin() {
                 const err = await signIn(username, password);
                 setError(err);
                 setSubmitting(false);
-                if (!err) void navigate({ to: "/paralegal" });
+                if (!err) router.push("/staff/cases");
               }}
             >
               <div className="space-y-1.5">

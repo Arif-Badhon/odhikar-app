@@ -26,7 +26,7 @@ export default function CaseDetail({ params }: { params: { caseId: string } }) {
           It may have been reset. Return to the queue.
         </p>
         <Button asChild className="mt-6">
-          <Link href="/paralegal">Back to queue</Link>
+          <Link href="/staff/cases">Back to queue</Link>
         </Button>
       </main>
     );
@@ -38,7 +38,7 @@ export default function CaseDetail({ params }: { params: { caseId: string } }) {
 
   return (
     <main className="mx-auto max-w-7xl px-5 py-6">
-      <Link href="/paralegal"
+      <Link href="/staff/cases"
         className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="size-4" /> Case queue
@@ -62,6 +62,16 @@ export default function CaseDetail({ params }: { params: { caseId: string } }) {
       <div className="mt-5 grid gap-6 lg:grid-cols-[1.35fr_1fr]">
         <div className="space-y-6">
           <CaseSummary record={record} editable onChange={save} />
+          
+          {record.generatedReport && (
+            <div className="surface-panel p-5 border-l-4 border-l-primary">
+              <h2 className="text-sm font-semibold mb-3">AI Paralegal Report</h2>
+              <div className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
+                {record.generatedReport}
+              </div>
+            </div>
+          )}
+
           <ComplaintDraft record={record} editable onChange={save} />
         </div>
 

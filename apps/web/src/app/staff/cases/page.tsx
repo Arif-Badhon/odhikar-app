@@ -107,7 +107,7 @@ export default function Queue() {
                   </td>
                   <td className="px-5 py-4 text-right">
                     <Button asChild size="sm" variant="outline">
-                      <Link href="/paralegal/$caseId" params={{ caseId: c.id }}>
+                      <Link href={`/staff/${c.id}`}>
                         Open
                       </Link>
                     </Button>
