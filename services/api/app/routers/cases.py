@@ -69,11 +69,11 @@ async def submit_case(request: Request, conn = Depends(get_db_connection)):
 
     query = """
     INSERT INTO cases (
-        case_number, case_kind, status, urgency, primary_category, 
+        case_number, status, urgency, primary_category, 
         confidence, safety_flag, transcript_bn, audio_path, 
         structured_record, missing_fields
     ) VALUES (
-        $1, 'victim', $2, $3, $4, 
+        $1, $2, $3, $4, 
         $5, $6, $7, $8, 
         $9::jsonb, $10::jsonb
     )
