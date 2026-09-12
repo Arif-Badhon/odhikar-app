@@ -9,7 +9,7 @@ class GeminiClient:
         }
         # Primary endpoint and fallback endpoint
         self.primary_url = settings.GEMINI_API_URL
-        self.fallback_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+        self.fallback_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent"
 
     async def _post_with_fallback(self, payload: dict) -> dict:
         # Increase read timeout to 120s for processing audio over mobile networks
@@ -17,7 +17,7 @@ class GeminiClient:
         async with httpx.AsyncClient(timeout=timeout_config) as client:
             resp = await client.post(self.primary_url, headers=self.headers, json=payload)
             if resp.status_code == 404:
-                print(f"[GEMINI WARNING] Primary model 404, falling back to gemini-1.5-flash...")
+                print(f"[GEMINI WARNING] Primary model 404, falling back to gemini-3.6-flash...")
                 resp = await client.post(self.fallback_url, headers=self.headers, json=payload)
 
             if resp.status_code != 200:
