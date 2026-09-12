@@ -37,7 +37,7 @@ export const transcribeAudio = async ({ data: input }: { data: { base64: string;
   };
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${key}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -84,9 +84,15 @@ Leave any value you cannot ground in the text out of the JSON entirely (do not g
 For unpaid wages, if daysWorked and dailyRate are stated, compute wagesTotal and outstanding.
 Detect safety indicators (physical violence, injury, denial of medical care, confinement,
 threat to life). severity "immediate" means the automated flow must stop.
-Based on the provided narrative and legal context, you MUST return exactly 4 or 5 missing pieces of information a paralegal would still need to build a complete case, as machine keys from this set:
-respondent, marriageDate, dower, dowryPaid, dependants, daysWorked, dailyRate, wagesPaid,
-evidence, evidenceLocation, landArea, saleRisk, who, what, howLong.
+Based on the provided narrative and legal context, you MUST return the missing pieces of information a paralegal would still need to build a complete case, as machine keys.
+ONLY use the following allowed keys based on the primary category:
+- Dowry: respondent, marriageDate, dowryPaid, evidenceLocation
+- Dower & Maintenance: respondent, dower, marriageDate, dependants
+- Unpaid Wages: respondent, daysWorked, dailyRate, wagesPaid, evidence
+- Land Dispute: respondent, landArea, evidenceLocation, saleRisk
+- Out of scope: who, what, howLong
+
+Return ONLY the keys from the allowed list that are actually missing from the narrative.
 Reply with JSON only.`;
 };
 
@@ -120,7 +126,7 @@ export const analyseNarrative = async ({ data: input }: { data: { transcript: st
     .join("\n");
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${key}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
     const payload = {
       systemInstruction: {
         parts: [{ text: `${getSystemPrompt()}\nJSON shape:\n${SCHEMA}` }]
@@ -211,7 +217,7 @@ Your report must:
 Do not include JSON, just return the markdown report text.`;
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${key}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
