@@ -1,5 +1,7 @@
 "use client";
 
+import { use } from "react";
+
 import Link from "next/link";
 import { AlertTriangle, ArrowLeft, CalendarClock, UserCog } from "lucide-react";
 import { toast } from "sonner";
@@ -13,10 +15,17 @@ import { CLINICS } from "@/lib/odhikar/fixtures";
 import type { CaseRecord } from "@/lib/odhikar/types";
 
 
-export default function CaseDetail({ params }: { params: { caseId: string } }) {
-  const { caseId } = params;
-  const { getCase, upsert } = useCaseStore();
+export default function CaseDetail({ params }: { params: Promise<{ caseId: string }> }) {
+  const { caseId } = use(params);
+  const { getCase, upsert, loading } = useCaseStore();
   const record = getCase(caseId);
+
+  if (loading && !record)
+    return (
+      <main className="mx-auto max-w-3xl px-5 py-16 text-center">
+        <h1 className="text-xl font-semibold">Loading secure case records...</h1>
+      </main>
+    );
 
   if (!record)
     return (
