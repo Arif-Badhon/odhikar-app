@@ -12,7 +12,10 @@ export const ensureDemoStaff = async ({ data: input }: { data: { username: strin
     password: String(input?.password ?? ""),
   };
     const demo = DEMO[data.username as keyof typeof DEMO];
-    if (!demo || demo.password !== data.password) return { ok: false as const };
+    if (!demo || demo.password !== data.password) {
+      console.error("Invalid demo credentials check:", { demoExists: !!demo, pwMatch: demo?.password === data.password });
+      return { ok: false as const, error: "Invalid demo credentials" };
+    }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const users = await supabaseAdmin.auth.admin.listUsers();
     let user = users.data.users.find((item) => item.email === demo.email);
@@ -23,7 +26,10 @@ export const ensureDemoStaff = async ({ data: input }: { data: { username: strin
         email_confirm: true,
         user_metadata: { display_name: demo.name },
       });
-      if (created.error || !created.data.user) return { ok: false as const };
+      if (created.error || !created.data.user) {
+        console.error("Supabase createUser error:", created.error);
+        return { ok: false as const, error: created.error?.message || "Unknown error creating user" };
+      }
       user = created.data.user;
     }
     // Remove an initial placeholder profile, if present, before binding the real Auth identity.

@@ -35,7 +35,7 @@ export function useParalegalSession() {
     let email = username.trim().toLowerCase();
     if (!email.includes("@")) {
       const provisioned = await ensureDemoStaff({ data: { username: email, password } });
-      if (!provisioned.ok) return "Incorrect username or password.";
+      if (!provisioned.ok) return provisioned.error || "Incorrect username or password.";
       email = provisioned.email;
     }
     const result = await supabase.auth.signInWithPassword({ email, password });
